@@ -18,7 +18,7 @@ class MQTTClient(mqtt.Client):
         def wrapper(*args, **kwargs):
             start_time = time.time()
             try:
-                resule = attr(*args, **kwargs)
+                result = attr(*args, **kwargs)
             except Exception as e:
                 total_time = int((time.time() - start_time) * 1000)
                 events.request_failure.fire(
