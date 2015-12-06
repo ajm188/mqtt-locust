@@ -112,5 +112,9 @@ class MQTTLocust(Locust):
         if self.host is None:
             raise LocustError("You must specify a host")
         self.client = MQTTClient()
-        self.client.connect(self.host)
+        try:
+            [host,port] = self.host.split(":")
+        except:
+            host, port = self.host, 1883
+        self.client.connect(host, port=port)
         self.client.loop_start()
