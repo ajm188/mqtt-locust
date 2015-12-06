@@ -71,7 +71,7 @@ class MQTTClient(mqtt.Client):
         if message is None:
             return
         total_time = time_delta(message.start_time, end_time)
-        if message.timeout is not None and message.timeout > total_time:
+        if message.timed_out(total_time):
             fire_locust_failure(
                 request_type='mqtt',
                 name='publish',
