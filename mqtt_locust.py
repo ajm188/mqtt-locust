@@ -12,6 +12,14 @@ def time_delta(t1, t2):
     return int((t2 - t1) * 1000)
 
 
+def fire_locust_failure(**kwargs):
+    events.request_failure.fire(**kwargs)
+
+
+def fire_locust_success(**kwargs):
+    events.request_success.fire(**kwargs)
+
+
 class LocustError(Exception):
     pass
 
