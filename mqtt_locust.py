@@ -8,8 +8,20 @@ from locust import TaskSet
 from locust import events
 
 
+def time_delta(t1, t2):
+    return int((t2 - t1) * 1000)
+
+
 class LocustError(Exception):
     pass
+
+
+class Message(object):
+
+    def __init__(self, topic, payload, start_time):
+        self.topic = topic
+        self.payload = payload
+        self.start_time = start_time
 
 
 class MQTTClient(mqtt.Client):
