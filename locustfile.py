@@ -3,7 +3,7 @@ from locust import TaskSet, task
 from mqtt_locust import MQTTLocust
 
 class MyTaskSet(TaskSet):
-    @task(2)
+    @task(1)
     def test(self):
         self.client.publish('/topic', 'Message')
 
