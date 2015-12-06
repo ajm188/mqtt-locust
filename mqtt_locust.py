@@ -58,7 +58,7 @@ class MQTTClient(mqtt.Client):
             self.mmap[mid] = Message(topic, payload, start_time, timeout)
         except Exception as e:
             total_time = time_delta(start_time, time.time())
-            events.request_failure.fire(
+            fire_locust_failure(
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
@@ -70,12 +70,35 @@ class MQTTClient(mqtt.Client):
         message = self.mmap.pop(mid, None)
         if message is None:
             return
-        events.request_success.fire(
-            request_type='mqtt',
-            name='publish',
-            response_time = time_delta(message.start_time, end_time),
-            response_length = len(message.payload),
-        )
+        total_time = time_delta(message.start_time, end_time)
+        if message.timeout is not None and message.timeout > total_time:
+            fire_locust_failure(
+                request_type='mqtt',
+                name='publish',
+                response_time=total_time,
+                exception=TimeoutException((timeout, total_time)),
+            )
+        else:
+            fire_locust_success(
+                request_type='mqtt',
+                name='publish',
+                response_time=total_time,
+                response_length=len(message.payload),
+            )
+        self.check_for_locust_timeouts(end_time)
+
+    def check_for_locust_timeouts(self, end_time):
+        timed_out = [mid for mid, msg in self.mmap
+                     if msg.timed_out(time_delta(msg.start_time, end_time))]
+        for mid in timed_out:
+            msg = self.mmap.pop(mid)
+            total_time = time_delta(msg.start_time, end_time)
+            fire_locust_failure(
+                request_type='mqtt',
+                name='publish',
+                response_time=total_time,
+                exception=TimeoutError((msg.timeout, total_time)),
+            )
 
     def __getattribute__(self, name):
         attr = mqtt.Client.__getattribute__(self, name)
