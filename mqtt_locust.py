@@ -8,6 +8,10 @@ from locust import TaskSet
 from locust import events
 
 
+class LocustError(Exception):
+    pass
+
+
 class MQTTClient(mqtt.Client):
 
     def sendMessage(self, topic, message):
