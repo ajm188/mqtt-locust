@@ -42,6 +42,10 @@ class Message(object):
 
 class MQTTClient(mqtt.Client):
 
+    def __init__(self, *args, **kwargs):
+        super(MQTTClient, self).__init__(*args, **kwargs)
+        self.on_publish = self._on_publish
+
     def publish(self, topic, payload=None, **kwargs):
         timeout = kwargs.pop('timeout', 5)
         if not hasattr(self, 'mmap'):
@@ -65,7 +69,7 @@ class MQTTClient(mqtt.Client):
                 exception=e,
             )
 
-    def on_publish(self, client, userdata, mid):
+    def _on_publish(self, client, userdata, mid):
         end_time = time.time()
         message = self.mmap.pop(mid, None)
         if message is None:
@@ -76,7 +80,7 @@ class MQTTClient(mqtt.Client):
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
-                exception=TimeoutException((timeout, total_time)),
+                exception=TimeoutError((message.timeout, total_time)),
             )
         else:
             fire_locust_success(
@@ -88,7 +92,7 @@ class MQTTClient(mqtt.Client):
         self.check_for_locust_timeouts(end_time)
 
     def check_for_locust_timeouts(self, end_time):
-        timed_out = [mid for mid, msg in self.mmap
+        timed_out = [mid for mid, msg in self.mmap.iteritems()
                      if msg.timed_out(time_delta(msg.start_time, end_time))]
         for mid in timed_out:
             msg = self.mmap.pop(mid)
@@ -99,34 +103,6 @@ class MQTTClient(mqtt.Client):
                 response_time=total_time,
                 exception=TimeoutError((msg.timeout, total_time)),
             )
-
-    def __getattribute__(self, name):
-        attr = mqtt.Client.__getattribute__(self, name)
-        if not callable(attr):
-            return attr
-
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-            try:
-                result = attr(*args, **kwargs)
-            except Exception as e:
-                total_time = int((time.time() - start_time) * 1000)
-                events.request_failure.fire(
-                        request_type='mqtt', name=name,
-                        response_time=total_time, exception=e
-                        )
-            else:
-                total_time = int((time.time() - start_time) * 1000)
-                # TODO: response_length
-                events.request_success.fire(
-                        request_type='mqtt', name=name,
-                        response_time=total_time, response_length=0
-                        )
-
-        if name == 'publish':
-            return wrapper
-        else:
-            return attr
 
 
 class MQTTLocust(Locust):

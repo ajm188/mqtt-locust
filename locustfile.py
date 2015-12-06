@@ -1,15 +1,18 @@
 import json
 import random
+import resource
 
 from locust import TaskSet, task
 
 from mqtt_locust import MQTTLocust
 
+resource.setrlimit(resource.RLIMIT_NOFILE, (999999, 999999))
+
 
 class MyTaskSet(TaskSet):
     @task(1)
     def test(self):
-        self.client.publish('lamp/set_config', self.payload())
+        self.client.publish('lamp/set_config', self.payload(), qos=0)
 
     def payload(self):
         payload = {
