@@ -24,12 +24,20 @@ class LocustError(Exception):
     pass
 
 
+class TimeoutError(ValueError):
+    pass
+
+
 class Message(object):
 
-    def __init__(self, topic, payload, start_time):
+    def __init__(self, topic, payload, start_time, timeout):
         self.topic = topic
         self.payload = payload
         self.start_time = start_time
+        self.timeout = timeout
+
+    def timed_out(self, total_time):
+        return self.timeout is not None and total_time > self.timeout
 
 
 class MQTTClient(mqtt.Client):
@@ -44,10 +52,7 @@ class MQTTClient(mqtt.Client):
             )
             if err:
                 raise ValueError(err)
-            self.mmap = {} if not hasattr(self, 'mmap') else self.mmap
-            self.mmap[mid] = Message(topic, payload, start_time)
-            # TODO: need to have another thread that loops and looks for
-            # timed-out messages and marks them as failed
+            self.mmap[mid] = Message(topic, payload, start_time, timeout)
         except Exception as e:
             total_time = time_delta(start_time, time.time())
             events.request_failure.fire(
