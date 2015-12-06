@@ -26,8 +26,40 @@ class Message(object):
 
 class MQTTClient(mqtt.Client):
 
-    def sendMessage(self, topic, message):
-        print(topic, message)
+    def publish(self, topic, payload=None, **kwargs):
+        start_time = time.time()
+        try:
+            err, mid = super(MQTTClient, self).publish(
+                topic,
+                payload=payload,
+                **kwargs
+            )
+            if err:
+                raise ValueError(err)
+            self.mmap = {} if not hasattr(self, 'mmap') else self.mmap
+            self.mmap[mid] = Message(topic, payload, start_time)
+            # TODO: need to have another thread that loops and looks for
+            # timed-out messages and marks them as failed
+        except Exception as e:
+            total_time = time_delta(start_time, time.time())
+            events.request_failure.fire(
+                request_type='mqtt',
+                name='publish',
+                response_time=total_time,
+                exception=e,
+            )
+
+    def on_publish(self, client, userdata, mid):
+        end_time = time.time()
+        message = self.mmap.pop(mid, None)
+        if message is None:
+            return
+        events.request_success.fire(
+            request_type='mqtt',
+            name='publish',
+            response_time = time_delta(message.start_time, end_time),
+            response_length = len(message.payload),
+        )
 
     def __getattribute__(self, name):
         attr = mqtt.Client.__getattribute__(self, name)
