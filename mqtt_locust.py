@@ -43,6 +43,9 @@ class Message(object):
 class MQTTClient(mqtt.Client):
 
     def publish(self, topic, payload=None, **kwargs):
+        timeout = kwargs.pop('timeout', 5)
+        if not hasattr(self, 'mmap'):
+            self.mmap = {}
         start_time = time.time()
         try:
             err, mid = super(MQTTClient, self).publish(
