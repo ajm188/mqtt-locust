@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 
 import paho.mqtt.client as mqtt
 from locust import Locust
@@ -75,13 +76,13 @@ class MQTTClient(mqtt.Client):
         message = self.mmap.pop(mid, None)
         if message is None:
             return
-        total_time = time_delta(message.start_time, end_time)
+        total_time = end_time - message.start_time
         if message.timed_out(total_time):
             fire_locust_failure(
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
-                exception=TimeoutError(message.timeout),
+                exception=TimeoutError("publish timed out"),
             )
         else:
             fire_locust_success(
@@ -94,15 +95,18 @@ class MQTTClient(mqtt.Client):
 
     def check_for_locust_timeouts(self, end_time):
         timed_out = [mid for mid, msg in dict(self.mmap).iteritems()
-                     if msg.timed_out(time_delta(msg.start_time, end_time))]
+                     if msg.timed_out(end_time - msg.start_time)]
         for mid in timed_out:
             msg = self.mmap.pop(mid)
-            total_time = time_delta(msg.start_time, end_time)
+            total_time = end_time - msg.start_time
+            print(total_time)
             fire_locust_failure(
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
-                exception=TimeoutError(msg.timeout),
+                exception=TimeoutError(
+                    "message not received in %s s" % msg.timeout
+                    ),
             )
 
 
@@ -114,7 +118,7 @@ class MQTTLocust(Locust):
             raise LocustError("You must specify a host")
         self.client = MQTTClient()
         try:
-            [host,port] = self.host.split(":")
+            [host, port] = self.host.split(":")
         except:
             host, port = self.host, 1883
         self.client.connect(host, port=port)

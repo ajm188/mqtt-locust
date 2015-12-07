@@ -13,7 +13,8 @@ class MyTaskSet(TaskSet):
     @task(1)
     def test(self):
         self.client.publish(
-                'lamp/set_config', self.payload(), qos=0, timeout=60, repeat=10
+                'lamp/set_config', self.payload(), qos=0, timeout=600,
+                repeat=10
                 )
 
     def payload(self):
