@@ -46,11 +46,10 @@ class MQTTClient(mqtt.Client):
     def __init__(self, *args, **kwargs):
         super(MQTTClient, self).__init__(*args, **kwargs)
         self.on_publish = self._on_publish
+        self.mmap = {}
 
     def publish(self, topic, payload=None, repeat=1, **kwargs):
         timeout = kwargs.pop('timeout', 5)
-        if not hasattr(self, 'mmap'):
-            self.mmap = {}
         for i in range(repeat):
             start_time = time.time()
             try:
