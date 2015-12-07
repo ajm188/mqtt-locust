@@ -46,28 +46,29 @@ class MQTTClient(mqtt.Client):
         super(MQTTClient, self).__init__(*args, **kwargs)
         self.on_publish = self._on_publish
 
-    def publish(self, topic, payload=None, **kwargs):
+    def publish(self, topic, payload=None, repeat=1, **kwargs):
         timeout = kwargs.pop('timeout', 5)
         if not hasattr(self, 'mmap'):
             self.mmap = {}
-        start_time = time.time()
-        try:
-            err, mid = super(MQTTClient, self).publish(
-                topic,
-                payload=payload,
-                **kwargs
-            )
-            if err:
-                raise ValueError(err)
-            self.mmap[mid] = Message(topic, payload, start_time, timeout)
-        except Exception as e:
-            total_time = time_delta(start_time, time.time())
-            fire_locust_failure(
-                request_type='mqtt',
-                name='publish',
-                response_time=total_time,
-                exception=e,
-            )
+        for i in range(repeat):
+            start_time = time.time()
+            try:
+                err, mid = super(MQTTClient, self).publish(
+                    topic,
+                    payload=payload,
+                    **kwargs
+                )
+                if err:
+                    raise ValueError(err)
+                self.mmap[mid] = Message(topic, payload, start_time, timeout)
+            except Exception as e:
+                total_time = time_delta(start_time, time.time())
+                fire_locust_failure(
+                    request_type='mqtt',
+                    name='publish',
+                    response_time=total_time,
+                    exception=e,
+                )
 
     def _on_publish(self, client, userdata, mid):
         end_time = time.time()
@@ -80,7 +81,7 @@ class MQTTClient(mqtt.Client):
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
-                exception=TimeoutError((message.timeout, total_time)),
+                exception=TimeoutError(message.timeout),
             )
         else:
             fire_locust_success(
@@ -92,7 +93,7 @@ class MQTTClient(mqtt.Client):
         self.check_for_locust_timeouts(end_time)
 
     def check_for_locust_timeouts(self, end_time):
-        timed_out = [mid for mid, msg in self.mmap.iteritems()
+        timed_out = [mid for mid, msg in dict(self.mmap).iteritems()
                      if msg.timed_out(time_delta(msg.start_time, end_time))]
         for mid in timed_out:
             msg = self.mmap.pop(mid)
@@ -101,7 +102,7 @@ class MQTTClient(mqtt.Client):
                 request_type='mqtt',
                 name='publish',
                 response_time=total_time,
-                exception=TimeoutError((msg.timeout, total_time)),
+                exception=TimeoutError(msg.timeout),
             )
 
 

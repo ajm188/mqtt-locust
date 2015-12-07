@@ -12,7 +12,9 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (999999, 999999))
 class MyTaskSet(TaskSet):
     @task(1)
     def test(self):
-        self.client.publish('lamp/set_config', self.payload(), qos=0)
+        self.client.publish(
+                'lamp/set_config', self.payload(), qos=0, timeout=60, repeat=10
+                )
 
     def payload(self):
         payload = {
