@@ -99,7 +99,6 @@ class MQTTClient(mqtt.Client):
         for mid in timed_out:
             msg = self.mmap.pop(mid)
             total_time = end_time - msg.start_time
-            print(total_time)
             fire_locust_failure(
                 request_type='mqtt',
                 name='publish',
