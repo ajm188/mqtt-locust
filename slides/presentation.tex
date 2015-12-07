@@ -36,8 +36,9 @@
     \frametitle{Extending locust to support MQTT}
     \begin{enumerate}
         \item Fairly easy to do.
-        \item Focused mainly on ``publish'' behavior, but would be easy to add
-        other user behaviors (e.g. subscribing).
+        \item Focused mainly on \texttt{publish} behavior, but would be easy to
+        add other user behaviors (e.g. \texttt{subscribe} and verify a message
+        was received).
         \item
             Other tools for load-testing mqtt brokers:
             \begin{enumerate}
@@ -50,12 +51,24 @@
                     \end{enumerate}
             \end{enumerate}
     \end{enumerate}
-    % TODO
 \end{frame}
 
 \begin{frame}
     \frametitle{Issues}
-    % TODO
+    \begin{enumerate}
+        \item
+            Overwhelming the broker with too many connections.
+            \begin{enumerate}
+                \item Each ``user'' would open it`s own connection to the
+                broker. So, to send $n$ messages simltaneously, we would need
+                $n$ simultaneous connections to the broker. This significantly
+                limited the amount we could scale mqtt-locust.
+                \item Solution: Override the \texttt{publish} method to take a
+                \texttt{repeat} keyword argument. Each ``user'' would then send
+                \texttt{repeat} messages. This way, we can send the same number
+                of messages with fewer connections to the broker.
+            \end{enumerate}
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}
