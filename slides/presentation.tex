@@ -72,6 +72,26 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{Issues}
+    \begin{enumerate}
+        \item
+            Tracking messages. Python threads and stuff.
+            \begin{enumerate}
+                \item To track messages, we store them in a dictionary, and
+                then use the underlying \texttt{on\_publish} method to fire the
+                various locust events.
+                \item But, as load increases, messages get published faster
+                than \texttt{on\_publish} can enumerate the dictionary. Python
+                then complains that the size of the dictionary is changing
+                during enumeration.
+                \item Solution: Using \texttt{dict(mmap)}, we get a copy of the
+                dictionary, which we can then enumerate safely. This operation
+                completes quickly enough that we don't get the previous error.
+            \end{enumerate}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
     \frametitle{mqtt-locust results}
     % TODO
 \end{frame}
