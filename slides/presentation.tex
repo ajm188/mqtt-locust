@@ -1,8 +1,14 @@
 \documentclass{beamer}
 
+\newcommand{\email}[1]{\texttt{#1}}
+
 \title{mqtt-locust}
 \author[Bentley, Mason]
-{M. Bentley \and A. Mason}
+{
+    M. Bentley \and A. Mason\\
+    \email{\{void,null\}@case.edu}
+}
+\institute[CWRU]{Case Western Reserve University}
 
 \begin{document}
 \frame{\titlepage}
@@ -27,7 +33,23 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Extending locust}
+    \frametitle{Extending locust to support MQTT}
+    \begin{enumerate}
+        \item Fairly easy to do.
+        \item Focused mainly on ``publish'' behavior, but would be easy to add
+        other user behaviors (e.g. subscribing).
+        \item
+            Other tools for load-testing mqtt brokers:
+            \begin{enumerate}
+                \item
+                    \href{https://github.com/leandog/mqtt-malaria}{mqtt-malaria}
+                    \begin{enumerate}
+                        \item However, mqtt-malaria only scales horizontally to
+                        the number of cores on a single machine. Using locust
+                        will allow us to scale our testing to many machines.
+                    \end{enumerate}
+            \end{enumerate}
+    \end{enumerate}
     % TODO
 \end{frame}
 
