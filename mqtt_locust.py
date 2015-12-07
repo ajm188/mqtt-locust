@@ -101,10 +101,9 @@ class MQTTClient(mqtt.Client):
         self.check_for_locust_timeouts(end_time)
 
     def _on_disconnect(self, client, userdata, rc):
-        message = self.mmap[0]
         fire_locust_failure(
             request_type='mqtt',
-            name=message.name,
+            name=userdata,
             response_time=0,
             exception=DisconnectError("disconnected"),
         )
