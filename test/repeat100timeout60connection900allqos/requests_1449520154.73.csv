@@ -1,0 +1,5 @@
+"Method","Name","# requests","# failures","Median response time","Average response time","Min response time","Max response time","Average Content Size","Requests/s"
+"mqtt","qos0 publish",421675,34599,0,0,0,0,110,1061.86
+"mqtt","qos1 publish",462140,756,0,0,0,2,108,1163.76
+"mqtt","qos2 publish",450698,472,0,0,0,3,110,1134.94
+"None","Total",1334513,35827,0,0,0,3,109,3360.56
