@@ -1,0 +1,74 @@
+\documentclass{beamer}
+
+\title{mqtt-locust}
+\author[Bentley, Mason]
+{M. Bentley \and A. Mason}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Locust}
+    \begin{enumerate}
+        \item Load testing framework written in Python
+        \item
+            Distributed model out of the box
+            \begin{enumerate}
+                \item Can be run in master-slave configuration to put your
+                machines under even higher load
+            \end{enumerate}
+        \item
+            But… only supports HTTP out of the box
+            \begin{enumerate}
+                \item Can be extended for any protocol by writing a client that
+                fires success/failure events
+            \end{enumerate}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Extending locust}
+    % TODO
+\end{frame}
+
+\begin{frame}
+    \frametitle{Issues}
+    % TODO
+\end{frame}
+
+\begin{frame}
+    \frametitle{mqtt-locust results}
+    % TODO
+\end{frame}
+
+\begin{frame}
+    \frametitle{mqtt-locust vs mqtt-malaria}
+    % TODO
+\end{frame}
+
+\begin{frame}
+    \frametitle{Future Work and Goals}
+    \begin{enumerate}
+        \item
+            Clean up connections on close.
+        \item
+            Handle disconnecting and reconnecting cleanly.
+            \begin{enumerate}
+                \item
+            \end{enumerate}
+        \item
+            Should error upon double-receiving a message. Or, at least log a
+            warning.
+            \begin{enumerate}
+                \item
+            \end{enumerate}
+        \item
+            Submit to upstream locust to have it included by default.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Conclusion}
+    % TODO
+\end{frame}
+\end{document}
