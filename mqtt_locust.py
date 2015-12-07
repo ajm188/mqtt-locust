@@ -29,6 +29,10 @@ class TimeoutError(ValueError):
     pass
 
 
+class DisconnectError(Exception):
+    pass
+
+
 class Message(object):
 
     def __init__(self, topic, payload, start_time, timeout, name):
@@ -47,6 +51,7 @@ class MQTTClient(mqtt.Client):
     def __init__(self, *args, **kwargs):
         super(MQTTClient, self).__init__(*args, **kwargs)
         self.on_publish = self._on_publish
+        self.on_disconnect = self._on_disconnect
         self.mmap = {}
 
     def publish(self, topic, payload=None, repeat=1, name='mqtt', **kwargs):
@@ -94,6 +99,16 @@ class MQTTClient(mqtt.Client):
                 response_length=len(message.payload),
             )
         self.check_for_locust_timeouts(end_time)
+
+    def _on_disconnect(self, client, userdata, rc):
+        message = self.mmap[0]
+        fire_locust_failure(
+            request_type='mqtt',
+            name=message.name,
+            response_time=0,
+            exception=DisconnectError("disconnected"),
+        )
+        self.reconnect()
 
     def check_for_locust_timeouts(self, end_time):
         timed_out = [mid for mid, msg in dict(self.mmap).iteritems()
