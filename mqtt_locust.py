@@ -63,7 +63,7 @@ class MQTTClient(mqtt.Client):
                     raise ValueError(err)
                 self.mmap[mid] = Message(topic, payload, start_time, timeout)
             except Exception as e:
-                total_time = time_delta(start_time, time.time())
+                total_time = time.time() - start_time
                 fire_locust_failure(
                     request_type='mqtt',
                     name='publish',
