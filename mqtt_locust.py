@@ -51,7 +51,6 @@ class MQTTClient(mqtt.Client):
 
     def publish(self, topic, payload=None, repeat=1, name='mqtt', **kwargs):
         timeout = kwargs.pop('timeout', 5)
-        name = kwargs.pop('name', 'mqtt')
         for i in range(repeat):
             start_time = time.time()
             try:
