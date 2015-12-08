@@ -103,7 +103,7 @@ class MQTTClient(mqtt.Client):
     def _on_disconnect(self, client, userdata, rc):
         fire_locust_failure(
             request_type='mqtt',
-            name=userdata,
+            name=client,
             response_time=0,
             exception=DisconnectError("disconnected"),
         )
