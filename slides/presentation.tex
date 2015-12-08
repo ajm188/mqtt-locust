@@ -90,12 +90,46 @@
 
 \begin{frame}
     \frametitle{mqtt-locust results}
-    % TODO
+    \framesubtitle{Finding where more users send no more messages}
+    \begin{enumerate}
+        \item Baseline (no usage):
+            \begin{enumerate}
+                \item 43k publishes received per minute
+                \item 8\% CPU usage
+                \item 0 network usage
+            \end{enumerate}
+        \item 1000 users:
+            \begin{enumerate}
+                \item 435k publishes received per minute
+                \item 100\% CPU usage
+                \item 1.5MB/s network in
+                \item 1\% message failure
+            \end{enumerate}
+        \item 4000 users (maximum):
+            \begin{enumerate}
+                \item 1 million publishes received per minute
+                \item 100\% CPU usage
+                \item 4MB/s network in
+                \item 7\% message failure
+            \end{enumerate}
+        \item 5000 users (no increase in messages):
+            \begin{enumerate}
+                \item 1 million publishes received per minute
+                \item 100\% CPU usage
+                \item 4MB/s network in
+                \item 8\% message failure
+            \end{enumerate}
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}
     \frametitle{mqtt-locust vs mqtt-malaria}
-    % TODO
+    \begin{enumerate}
+        \item mqtt-malaria is much less robust
+        \item
+            Even on the same server under ideal conditions we could only make
+            mqtt-malaria publish 500k messages per minute
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}
@@ -107,12 +141,18 @@
             Handle disconnecting and reconnecting cleanly.
             \begin{enumerate}
                 \item
+                    mqtt connections occasionally fail for reasons out of our
+                    control
+                \item We should handle this gracefully and log that it happened
             \end{enumerate}
         \item
             Should error upon double-receiving a message. Or, at least log a
             warning.
             \begin{enumerate}
                 \item
+                    \texttt{qos=1} guarantees that the message will be
+                    delivered at least once
+                \item We should track when a message is received more than once
             \end{enumerate}
         \item
             Submit to upstream locust to have mqtt support included by default.
